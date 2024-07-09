@@ -3,3 +3,4 @@ plotly
 geopandas
 folium
 contextily
+pandas==1.5.3

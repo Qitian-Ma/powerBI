@@ -1,6 +1,8 @@
 tablet
 plotly
-geopandas
-folium
+geopandas==0.14.4
+folium==0.17.0
 contextily
 pandas==1.5.3
+numpy==1.26.4
+streamlit==1.36.0

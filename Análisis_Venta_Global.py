@@ -421,16 +421,3 @@ if uploaded_file is not None:
 
     # Display the map in Streamlit
     st.components.v1.html(m_user._repr_html_(), width=1400, height=800)
-
-start_date = st.date_input('Start date', pd.to_datetime('2022-01-01'))
-end_date = st.date_input('End date', pd.to_datetime('2022-01-31'))
-
-if start_date > end_date:
-    st.error('Error: End date must fall after start date.')
-else:
-    st.success(f'Selected date range: {start_date} to {end_date}')
-
-    # Example of using the selected date range
-    date_range = pd.date_range(start_date, end_date)
-    st.write('Selected Date Range:')
-    st.write(date_range)

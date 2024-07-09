@@ -1,0 +1,5 @@
+tablet
+plotly
+geopandas
+folium
+contextily

@@ -395,14 +395,18 @@ selected_customer_df = selected_df[['Customer Name', 'Amount']].groupby(['Custom
 selected_customer_past_df = selected_past_df[['Customer Name', 'Amount']].groupby(['Customer Name']).sum()
 selected_customer_all_df =  selected_customer_df.merge(selected_customer_past_df, how="outer", on="Customer Name", suffixes=["_now", "_past"]).reset_index().rename({"Amount_now": "Ventas", "Amount_past":"Ventas Año Ant."}, axis=1)
 
+selected_customer_all_df = selected_customer_all_df.sort_values(by='Ventas', ascending=False).head(10)
+
 selected_customer_all_df["Var Año-a-Año Ventas"] = selected_customer_all_df["Ventas"] - selected_customer_all_df["Ventas Año Ant."]
-selected_customer_all_df["% Var Año-a-Año Ventas"] = selected_customer_all_df["Var Año-a-Año Ventas"] / selected_customer_all_df["Ventas Año Ant."].replace(0, np.nan)
+selected_customer_all_df["% Var Año-a-Año Ventas"] = (selected_customer_all_df["Var Año-a-Año Ventas"] / selected_customer_all_df["Ventas Año Ant."].replace(0, np.nan) * 100).round(2)
 
 selected_customer_all_df['Var pos Año-a-Año Ventas'] = selected_customer_all_df["Var Año-a-Año Ventas"].apply(lambda x: max(x, 0))
-selected_customer_all_df['Var neg Año-a-Año Ventas'] = selected_customer_all_df["Var Año-a-Año Ventas"].apply(lambda x: -min(x, 0))
+selected_customer_all_df['Var neg Año-a-Año Ventas'] = selected_customer_all_df["Var Año-a-Año Ventas"].apply(lambda x: min(x, 0))
+selected_customer_all_df = selected_customer_all_df.reset_index().drop(['index'], axis=1)
+
 # Sample Data similar to the provided image
 # data = {
-#     "Cliente": ["NOGUERA Y VINTRO ANDALUCIA S.L", "SUMINISTROS DE OFICINAS ALCETONER, S.L",
+#     "Customer Name": ["NOGUERA Y VINTRO ANDALUCIA S.L", "SUMINISTROS DE OFICINAS ALCETONER, S.L",
 #                 "SCOLARSON, S.L", "MUSTAFA AL LAL MAATEIS", "REGALOS DOMINGUEZ, S.L",
 #                 "PALOMINO DEL PINO, HELIO ALEJANDRO", "NOVEDADES MARLU, S.L",
 #                 "LEON TORRES, ALEJANDRO", "BAROPAPER, S.L", "RUEDA LÓPEZ, MAGDALENA",
@@ -458,13 +462,13 @@ selected_customer_all_df['Var neg Año-a-Año Ventas'] = selected_customer_all_d
 
 ###################################################
 
-# import streamlit as st
-# import pandas as pd
-# import plotly.graph_objects as go
+import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
 
-# # Sample Data similar to the provided image
+# Sample Data similar to the provided image
 # data = {
-#     "Cliente": [
+#     "Customer Name": [
 #         "NOGUERA Y VINTRO ANDALUCIA S.L", "SUMINISTROS DE OFICINAS ALCETONER, S.L",
 #         "SCOLARSON, S.L", "MUSTAFA AL LAL MAATEIS", "REGALOS DOMINGUEZ, S.L",
 #         "PALOMINO DEL PINO, HELIO ALEJANDRO", "NOVEDADES MARLU, S.L",
@@ -480,7 +484,7 @@ selected_customer_all_df['Var neg Año-a-Año Ventas'] = selected_customer_all_d
 #     "% Var Año-a-Año Ventas": [37.00, 100.66, 55.86, 85.64, 53.68, -0.30, 48.28, -47.27, 0.00, 0.00, 0.00, 11.66, 0.00, 0.00, 0.00, 100.00]
 # }
 
-# df = pd.DataFrame(data)
+# selected_customer_all_df = pd.DataFrame(data)
 
 # Streamlit Application
 st.title('Comparative Sales Analysis')
@@ -494,12 +498,14 @@ selected_clients = st.multiselect(
     'Select Clients', options=selected_customer_all_df['Customer Name'], default=selected_customer_all_df['Customer Name']
 )
 
+
 # Filter data based on selection
 filtered_df = selected_customer_all_df[selected_customer_all_df['Customer Name'].isin(selected_clients)]
-
+st.write(filtered_df)
 # Interactive Plotly Bar Chart
 fig = go.Figure()
 
+max_sale = max(filtered_df['Ventas Año Ant.'].max(), filtered_df["Ventas"].max())
 
 
 fig.add_trace(go.Bar(
@@ -538,7 +544,7 @@ for idx, row in filtered_df.iterrows():
 
 for idx, row in filtered_df.iterrows():
     fig.add_annotation(
-        x=row['Ventas']  + 200 if row['Var pos Año-a-Año Ventas'] > 0 else row['Ventas Año Ant.'] + 200,
+        x=row['Ventas']  + max_sale / 10 if row['Var pos Año-a-Año Ventas'] > 0 else row['Ventas Año Ant.'] + max_sale / 10,
         y=idx,
         text=f"{row['Ventas']}",
         showarrow=False,

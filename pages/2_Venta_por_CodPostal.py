@@ -3,6 +3,11 @@ from st_aggrid.shared import GridUpdateMode
 import streamlit as st
 import pandas as pd
 
+
+if 'selected_df' in st.session_state:
+    st.write(st.session_state.selected_df.head())
+
+
 def aggrid_interactive_table(df: pd.DataFrame):
     """Creates an st-aggrid interactive table based on a dataframe.
 

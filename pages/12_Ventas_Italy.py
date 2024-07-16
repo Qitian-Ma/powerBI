@@ -1,11 +1,3 @@
-from pathlib import Path
-import sys
-
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'util'))
-
-from load_data import load_data
-
-load_data()
 # import streamlit as st
 # import pandas as pd
 # import geopandas as gpd
@@ -58,16 +50,16 @@ import geopandas as gpd
 import requests
 import numpy as np
 
-# Sample sales data for different regions in Spain
+# Sample sales data for different regions in Italy
 data = {
-    'Region': ['Madrid', 'Barcelona', 'Sevilla', 'Valencia', 'A Coruña'],
-    'Sales': [25000, 20000, 15000, 12000, 8000]
+    'Region': ['Lombardia', 'Lazio', 'Campania', 'Sicilia', 'Veneto'],
+    'Sales': [30000, 22000, 18000, 16000, 14000]
 }
 
 df = pd.DataFrame(data)
 
-# URL to the GeoJSON file for Spain regions
-geojson_url = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/spain-provinces.geojson'
+# URL to the GeoJSON file for Italy regions
+geojson_url = 'https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_IT_regions.geojson'
 
 # Download the GeoJSON file
 response = requests.get(geojson_url)
@@ -77,7 +69,7 @@ geojson_data = response.json()
 geo_data = gpd.GeoDataFrame.from_features(geojson_data['features'])
 
 # Merge sales data with GeoDataFrame
-geo_data = geo_data.rename(columns={"name": "Region"})
+geo_data = geo_data.rename(columns={"reg_name": "Region"})
 geo_data['Region'] = geo_data['Region'].str.title()
 geo_data = geo_data.merge(df, on="Region", how="left")
 
@@ -93,7 +85,7 @@ def create_geomap(geo_data):
         color="Sales",
         hover_name="Region",
         projection="mercator",
-        title="Sales by Region in Spain",
+        title="Sales by Region in Italy",
         
         color_continuous_scale=[
             (0.0, "lightgrey"),    # No sales data
@@ -101,20 +93,20 @@ def create_geomap(geo_data):
         ],
         range_color=(0, geo_data['Sales'].max()),
     )
-    
 
     fig.update_geos(fitbounds="locations", visible=False)
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=0),
-                  width=1500, 
-                  height=800)
+                      width=1500, 
+                      height=800)
     return fig
 
 # Streamlit app
-st.title("Sales Geomap for Spain")
-st.write("Interactive geomap displaying sales data for different regions in Spain. Regions with no sales data are shown in grey.")
+st.title("Sales Geomap for Italy")
+st.write("Interactive geomap displaying sales data for different regions in Italy. Regions with no sales data are shown in grey.")
 
 fig = create_geomap(geo_data)
 st.plotly_chart(fig)
+
 
 
 # import streamlit as st

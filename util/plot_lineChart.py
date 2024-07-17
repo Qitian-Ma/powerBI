@@ -1,5 +1,5 @@
 import streamlit as st
-from expander import adjust_for_february
+from .expander import adjust_for_february
 
 @st.experimental_fragment
 def plot_lineChart(selected_df, selected_past_df):

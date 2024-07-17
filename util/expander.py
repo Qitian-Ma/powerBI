@@ -2,7 +2,9 @@ import streamlit as st
 from util.button_action import clear_settings_country, clear_settings_client, clear_settings_category, \
                                clear_settings_brand, clear_settings_product, clear_settings_seller, \
                                select_all_country, select_all_client, select_all_category, \
-                               select_all_brand, select_all_product, select_all_seller
+                               select_all_brand, select_all_product, select_all_seller,\
+                               clear_settings_region, select_all_region
+from functools import partial
 
 def set_expander_country(default=None, options=None):
     with st.expander("País"):
@@ -10,11 +12,12 @@ def set_expander_country(default=None, options=None):
         with col21:
             st.button('Clear Selections', on_click=clear_settings_country, key='21')
         with col22:
-            st.button('Select All', on_click=select_all_country, key='22', type="primary", use_container_width=True)
+            st.button('Select All', on_click=partial(select_all_country, default), key='22', type="primary", use_container_width=True)
 
         if default is None or options is None:
             country_filter = st.multiselect('País', default=st.session_state.country_ls, options=st.session_state.country_ls, label_visibility ="collapsed", key='selected_options_country')
-
+        else:
+            country_filter = st.multiselect('País', default=default, options=options, label_visibility ="collapsed", key='selected_options_country')
     return country_filter
 
 def set_expander_client():
@@ -70,7 +73,21 @@ def set_expander_salesperon():
 
     return seller_filter
 
+def set_expander_region():
+    with st.expander("Region"):
+        col21, col22 = st.columns(2)
+        with col21:
+            st.button('Clear Selections', on_click=clear_settings_region, key='21')
+        with col22:
+            st.button('Select All', on_click=select_all_region, key='22', type="primary", use_container_width=True)
+        region_filter = st.multiselect('Region', default=st.session_state.region_ls, options=st.session_state.region_ls, label_visibility ="collapsed", key='selected_options_region')
+    return region_filter
+
+
 def set_date(start_date, end_date):
+    START_DATE = '2023-01-01'
+    END_DATE = '2023-12-31'
+    
     import pandas as pd
 
     col14, col15, col16 = st.columns([1, 1, 6])
@@ -81,7 +98,6 @@ def set_date(start_date, end_date):
             st.session_state['start_date'] = start_date
         else:
             start_date = st.date_input('Start date', st.session_state['start_date'])
-
 
     with col15:
         if 'end_date' not in st.session_state:
@@ -94,12 +110,11 @@ def set_date(start_date, end_date):
     # end_date = datetime.date(2024, 6, 6)
 
     with col16:
-        date_range = st.slider('Fecha', min_value=pd.to_datetime(start_date), max_value=pd.to_datetime(end_date), value=(pd.Timestamp(start_date).to_pydatetime(), pd.Timestamp(end_date).to_pydatetime()), format="YYYY-MM-DD")
-        start_date = date_range[0]
-        end_date = date_range[1]
-        if start_date != st.session_state.start_date or end_date != st.session_state.end_date:
-            st.session_state.start_date = start_date
-            st.session_state.end_date = end_date
+        date_range = st.slider('Fecha', min_value=pd.to_datetime(START_DATE), max_value=pd.to_datetime(END_DATE), value=(pd.Timestamp(start_date).to_pydatetime(), pd.Timestamp(end_date).to_pydatetime()), format="YYYY-MM-DD")
+
+        if date_range[0] != st.session_state.start_date or date_range[1] != st.session_state.end_date:
+            st.session_state['start_date'] = date_range[0]
+            st.session_state['end_date'] = date_range[1]
             st.rerun()
 
     return start_date, end_date

@@ -1,3 +1,5 @@
+
+    
 def load_data():
     import streamlit as st
     import pandas as pd
@@ -6,8 +8,8 @@ def load_data():
     file_ls = ['salesHeader_df', 'salesLine_df', 'brandCode_ls', 'productNo_ls', 'country_ls', 'customer_df', 'dimension_df', 'dimension_ls', 'productGroup_df', 'itemCategory_df', 'itemCategory_ls', 'salesPerson_df', 'salesPerson_ls'] 
     
     
-    # if functools.reduce(lambda a, b: a and b, file_ls) == True:
-    #     return
+    if functools.reduce(lambda a, b: a and b, file_ls) == True:
+        return
 
     @st.cache_data
     def load_sales_data():

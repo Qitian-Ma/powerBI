@@ -4,68 +4,103 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'util'))
 
 from load_data import load_data
-
-load_data()
-# import streamlit as st
-# import pandas as pd
-# import geopandas as gpd
-# import matplotlib.pyplot as plt
-# import contextily as ctx
-
-# # Sample sales data for locations in Spain
-# data = {
-#     'Province': ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Zaragoza', 'Málaga', 'Murcia'],
-#     'Sales': [200000, 180000, 150000, 170000, 130000, 140000, 120000]
-# }
-
-# # Create a DataFrame
-# df = pd.DataFrame(data)
-
-# # Load Spanish provinces shapefile
-# # Make sure to update the path to where you have saved the shapefile or GeoJSON
-# shapefile_path = 'gadm41_ESP_shp/gadm41_ESP_2.shp'  # Replace with the correct path
-# gdf_provinces = gpd.read_file(shapefile_path)
-
-# # Merge sales data with provinces GeoDataFrame
-# gdf_provinces = gdf_provinces.merge(df, left_on='NAME_2', right_on='Province', how='left')
-
-# # Streamlit app
-# st.title('Sales Geomap for Spain by Province')
-
-# st.markdown("""
-# This app visualizes sales data for various provinces in Spain. The color intensity of each province corresponds to the sales volume at that location.
-# """)
-
-# # Plotting the map
-# fig, ax = plt.subplots(1, 1, figsize=(10, 15))
-# gdf_provinces.plot(column='Sales', ax=ax, legend=True, cmap='OrRd', edgecolor='black', missing_kwds={"color": "lightgrey", "label": "No data"}, legend_kwds={'shrink': 0.42}, linewidth=.1)
-
-# # Add basemap
-# ctx.add_basemap(ax, crs=gdf_provinces.crs.to_string(), source=ctx.providers.CartoDB.Positron)
-
-
-# plt.title('Sales Data Geomap for Spain by Province')
-# plt.xlabel('Longitude')
-# plt.ylabel('Latitude')
-
-# Show the map in Streamlit
-# st.pyplot(fig)
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import geopandas as gpd
 import requests
 import numpy as np
+from util.expander import set_expander_region, set_expander_client, set_expander_category, set_expander_brand, set_expander_product, set_expander_salesperon, set_date, adjust_for_february
+from util.filter_data import filter_data
+from util.build_tablet import build_tablet
+from util.plot_lineChart import plot_lineChart
+from util.plot_barChart import plot_barChart
+import re
+
+load_data()
+zip_code_to_province_spain_df = pd.read_csv("data/zip_code_to_province_spain.csv", index_col=0)
+zip_code_to_province_spain_dict = zip_code_to_province_spain_df.set_index('ZIP Code Range').squeeze().to_dict()
+st.session_state['region_ls'] = list(zip_code_to_province_spain_dict.values())
+
+
+col1, col2, col3, col4 = st.columns(4)
+col5, col6, col7, col8 = st.columns(4)
+
+with col1:
+    st.image('ZhonghuiTitle.png', width=320)
+
+with col2:
+    st.session_state['region_filter'] = set_expander_region()
+
+with col3:
+    st.session_state['customer_type_filter'] = set_expander_client()
+        
+with col4:
+    st.session_state['category_filter'] = set_expander_category()
+        
+with col5:
+    st.markdown('<h3 class="custom-header", style="text-align: center;">Análisis Venta Global</h3>', unsafe_allow_html=True)
+
+with col6:
+    st.session_state['brand_filter'] = set_expander_brand()
+        
+with col7:
+    st.session_state['product_filter'] = set_expander_product()
+
+with col8:
+    st.session_state['seller_filter'] = set_expander_salesperon()
+
+start_date = '2023-01-01'
+end_date = '2023-12-31'
+
+st.session_state['start_date'], st.session_state['end_date'] = set_date(start_date, end_date)
+
+st.session_state['start_date_past'] = adjust_for_february(st.session_state['start_date'])
+st.session_state['end_date_past'] = adjust_for_february(st.session_state['end_date'])
+
+selected_df, selected_past_df = filter_data(["ES"], st.session_state['product_filter'], st.session_state['brand_filter'], st.session_state['customer_type_filter'], st.session_state['seller_filter'], st.session_state['category_filter'], st.session_state['start_date_past'], st.session_state['start_date'], st.session_state['end_date'], st.session_state['end_date_past'])
+
+
+def zip_code_to_province_spain(zip_code, zip_code_to_province_spain_dict):
+    import re
+
+    try:
+        return zip_code_to_province_spain_dict[re.sub(r"(^[0-9]{2})([0-9]{3})", r'\1xxx', str(zip_code))]
+    except:
+        return "unknown"
+    
+selected_df['Region'] = selected_df["Sell-to Post Code"].apply(lambda x: zip_code_to_province_spain(x, zip_code_to_province_spain_dict))
+
+
+
+    # st.experimental_rerun()
+
+selected_df = selected_df[selected_df['Region'].isin(st.session_state['region_filter'])]
+
+
+selected_customer_df = selected_df[['Customer Name', 'Amount']].groupby(['Customer Name']).sum()
+selected_customer_past_df = selected_past_df[['Customer Name', 'Amount']].groupby(['Customer Name']).sum()
+selected_customer_all_df =  selected_customer_df.merge(selected_customer_past_df, how="outer", on="Customer Name", suffixes=["_now", "_past"]).reset_index().rename({"Amount_now": "Ventas", "Amount_past":"Ventas Año Ant."}, axis=1)
+
+build_tablet(selected_df, selected_past_df)
+
+plot_lineChart(selected_df, selected_past_df)
+
+plot_barChart(selected_customer_all_df)
+
+
+# st.write(selected_df.head())
+# st.write(selected_df['Province'].unique())
 
 # Sample sales data for different regions in Spain
-data = {
-    'Region': ['Madrid', 'Barcelona', 'Sevilla', 'Valencia', 'A Coruña'],
-    'Sales': [25000, 20000, 15000, 12000, 8000]
-}
+# data = {
+#     'Region': ['Madrid', 'Barcelona', 'Sevilla', 'Valencia', 'A Coruña'],
+#     'Sales': [25000, 20000, 15000, 12000, 8000]
+# }
 
-df = pd.DataFrame(data)
+# df = pd.DataFrame(data)
 
+selected_df = selected_df[selected_df['Region']!=-1]
 # URL to the GeoJSON file for Spain regions
 geojson_url = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/spain-provinces.geojson'
 
@@ -78,8 +113,9 @@ geo_data = gpd.GeoDataFrame.from_features(geojson_data['features'])
 
 # Merge sales data with GeoDataFrame
 geo_data = geo_data.rename(columns={"name": "Region"})
+
 geo_data['Region'] = geo_data['Region'].str.title()
-geo_data = geo_data.merge(df, on="Region", how="left")
+geo_data = geo_data.merge(selected_df.groupby("Region")['Amount'].sum().reset_index().rename({"Amount": "Sales"}, axis=1), on="Region", how="left")
 
 # Set NaN sales to a special value to distinguish them
 geo_data['Sales'] = geo_data['Sales'].fillna(0)

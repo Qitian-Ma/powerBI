@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 
+@st.cache_data
 def filter_data(country_filter, product_filter, brand_filter, customer_type_filter, seller_filter, category_filter, start_date_past, start_date, end_date, end_date_past):
     salesHeader_selected_df = st.session_state.salesHeader_df[(st.session_state.salesHeader_df['Posting Date'] >= pd.to_datetime(start_date)) & (st.session_state.salesHeader_df['Posting Date'] <= pd.to_datetime(end_date)) & 
                                             (st.session_state.salesHeader_df['Sell-to Country_Region Code'].isin(country_filter)) ] 

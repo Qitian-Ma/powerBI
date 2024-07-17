@@ -1,6 +1,8 @@
+import streamlit as st
 
+@st.cache_data
 def build_tablet(selected_df, selected_past_df):
-    from tablet import get_html, custom_css
+    from .tablet import get_html, custom_css
     import streamlit as st
     import pandas as pd
     import numpy as np

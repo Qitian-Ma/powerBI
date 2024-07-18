@@ -10,8 +10,8 @@ custom_css = """
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     color: #333333;
-    width: 240px;
-    height: 300px;
+    width: 270px;
+    height: 320px;
     margin: 20px auto;
     text-align: center;
     font-family: 'Arial', sans-serif;
@@ -63,14 +63,14 @@ def get_html(name, current_sales, previous_sales, diff_percentage, euro=False):
 <div class="sales-widget">
     <h2>{name}</h2>
     <div class="value"> {current_sales:,.0f}</div>
-    <div class="previous">Año Ant.: {previous_sales:,.0f}</div>
+    <div class="previous">Año Ant.:<br>{previous_sales:,.0f}</div>
     <div class="difference {'negative' if diff_percentage < 0 else 'positive'}">{diff_percentage:.1f} %</div>
 </div> 
 """ if not euro else f"""
 <div class="sales-widget">
     <h2>{name}</h2>
     <div class="value"> € {current_sales:,.0f}</div>
-    <div class="previous">Año Ant.: € {previous_sales:,.0f}</div>
+    <div class="previous">Año Ant.:<br>€ {previous_sales:,.0f}</div>
     <div class="difference {'negative' if diff_percentage < 0 else 'positive'}">{diff_percentage:.1f} %</div>
 </div> 
 """

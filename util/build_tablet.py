@@ -86,6 +86,6 @@ def build_tablet(selected_df, selected_past_df):
 
         st.markdown(custom_css, unsafe_allow_html=True)
 
-        sales_widget_html = get_html("No. Artículos Distintos", current_sales, previous_sales, diff_percentage)
+        sales_widget_html = get_html("Artículos Distintos", current_sales, previous_sales, diff_percentage)
 
         st.markdown(sales_widget_html, unsafe_allow_html=True)

@@ -1,5 +1,6 @@
 import streamlit as st
 from .expander import adjust_for_february
+import plotly.graph_objects as go
 
 @st.experimental_fragment
 def plot_lineChart(selected_df, selected_past_df):
@@ -27,10 +28,25 @@ def plot_lineChart(selected_df, selected_past_df):
 
     selected_date_all_df = resample_df(freq)
 
-    st.line_chart(
-        data=selected_date_all_df,
-        x='Posting Date',
-        y=['Amount_past', 'Amount_now'],
-        y_label = 'Sales',
-        x_label = 'Date',
-        color=["#619CFF", "#F8766D"])
+    # st.line_chart(
+    #     data=selected_date_all_df,
+    #     x='Posting Date',
+    #     y=['Amount_past', 'Amount_now'],
+    #     y_label = 'Sales',
+    #     x_label = 'Date',
+    #     color=["#619CFF", "#F8766D"])
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(x=selected_date_all_df['Posting Date'], y=selected_date_all_df['Amount_past'],
+                             mode='lines+markers', name='Amount_past',
+                             line=dict(color='#619CFF')))
+    
+    fig.add_trace(go.Scatter(x=selected_date_all_df['Posting Date'], y=selected_date_all_df['Amount_now'],
+                             mode='lines+markers', name='Amount_now',
+                             line=dict(color='#F8766D')))
+    
+    fig.update_layout(title='Interactive Line Chart',
+                      xaxis_title='Date',
+                      yaxis_title='Sales')
+    
+    st.plotly_chart(fig, use_container_width=True)

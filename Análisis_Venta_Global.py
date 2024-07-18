@@ -13,7 +13,7 @@ import folium
 from folium.features import GeoJson, GeoJsonTooltip
 from datetime import datetime, timedelta
 import warnings
-
+from streamlit_plotly_events import plotly_events
 # Suppress specific warnings
 # warnings.filterwarnings("ignore", category=UserWarning, message="The widget with key.*")
 
@@ -356,6 +356,7 @@ m.save('map.html')
 
 # Display the map in Streamlit
 st.components.v1.html(m._repr_html_(), width=1400, height=800)
+
 
 # # JavaScript to handle the message and update the Streamlit session state
 # session_js = """

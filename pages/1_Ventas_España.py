@@ -17,6 +17,8 @@ from util.plot_lineChart import plot_lineChart
 from util.plot_barChart import plot_barChart
 import re
 
+st.set_page_config(page_title="Ventas_España", layout="wide")
+
 load_data()
 zip_code_to_province_spain_df = pd.read_csv("data/zip_code_to_province_spain.csv", index_col=0)
 zip_code_to_province_spain_dict = zip_code_to_province_spain_df.set_index('ZIP Code Range').squeeze().to_dict()

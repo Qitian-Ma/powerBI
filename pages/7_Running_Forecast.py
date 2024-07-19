@@ -14,9 +14,9 @@ df = pd.DataFrame(data)
 
 # Function to create an animated bar chart
 def create_bar_chart(data, selected_category=None):
-    fig = px.bar(data, x='Category', y='Values', title='Interactive Bar Chart with Animation')
+    fig = px.bar(data, x='Category', y='Values', title='Interactive Bar Chart with Animation', color_discrete_sequence=px.colors.qualitative.Light24)
     if selected_category:
-        fig.update_traces(marker_color=['red' if cat == selected_category else 'blue' for cat in data['Category']])
+        fig.update_traces(marker_color=['red' if cat == selected_category else 'dimgrey' for cat in data['Category']])
     return fig
 
 # Initialize Streamlit app
@@ -35,7 +35,10 @@ selected_points = plotly_events(chart, click_event=True, hover_event=False)
 # Capture click events from the bar chart
 if selected_points:
     clicked_category = selected_points[0]['x']
-    st.session_state.selected_category = clicked_category
+    if clicked_category == st.session_state.selected_category:
+        st.session_state.selected_category = None
+    else:
+        st.session_state.selected_category = clicked_category
     st.experimental_rerun()
 
 
